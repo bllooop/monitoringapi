@@ -1,0 +1,15 @@
+FROM golang:1.22
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY backend ./backend
+COPY ./pkg/logging /app/pkg/logging
+
+RUN go build -o /go/bin/backend ./backend/cmd/main.go
+
+EXPOSE 8000
+
+CMD ["/go/bin/backend"]

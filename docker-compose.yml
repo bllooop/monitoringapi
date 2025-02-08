@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: ./backend/Dockerfile-back
+    ports:
+      - 8000:8000
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+    environment:
+      - DB_PASSWORD=54321
+    networks:
+      - monitoring_network
+  pinger:
+    build: 
+      context: .
+      dockerfile: ./pinger/Dockerfile-ping
+    container_name: pinger
+    networks:
+      - monitoring_network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    restart: always
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile-front
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - monitoring_network
+    restart: unless-stopped
+  db:
+    container_name: db
+    restart: always
+    image: postgres:latest
+    volumes: 
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=54321
+    networks:
+      - monitoring_network
+    ports:
+      - 5436:5432
+
+volumes:
+  pgdata:
+
+networks:
+  monitoring_network:
+    name: monitoring_network
+    driver: bridge
