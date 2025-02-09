@@ -22,7 +22,7 @@ const (
 )
 
 func NewPostgresDB(cfg Config) (*pgxpool.Pool, error) {
-	logger.Log.Info().Msg("Connecting to the database / Подключение к базе данных")
+	logger.Log.Info().Msg("Подключение к базе данных")
 	db, err := pgxpool.New(context.Background(), fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.DBname, cfg.SSLMode))
 
 	if err != nil {

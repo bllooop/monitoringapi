@@ -13,8 +13,8 @@ import (
 func PingContainer(ip string) domain.PingResult {
 	pinger, err := probing.NewPinger(ip)
 	if err != nil {
-		logger.Log.Error().Err(err).Msgf("Error creating pinger %s", ip)
-		return domain.PingResult{IP: ip, LastSuccess: domain.LastSuccess}
+		logger.Log.Error().Err(err).Msgf("Ошибка создания pinger %s", ip)
+		return domain.PingResult{IP: ip, LastSuccess: domain.LastSuccess, Timestamp: time.Now()}
 	}
 
 	pinger.Count = 3
@@ -22,8 +22,8 @@ func PingContainer(ip string) domain.PingResult {
 
 	err = pinger.Run()
 	if err != nil {
-		logger.Log.Error().Err(err).Msgf("Ping failed for %s", ip)
-		return domain.PingResult{IP: ip, LastSuccess: domain.LastSuccess}
+		logger.Log.Error().Err(err).Msgf("Ошибка пинга для %s", ip)
+		return domain.PingResult{IP: ip, LastSuccess: domain.LastSuccess, Timestamp: time.Now()}
 	}
 
 	stats := pinger.Statistics()
@@ -33,15 +33,17 @@ func PingContainer(ip string) domain.PingResult {
 		result = domain.PingResult{
 			IP:          ip,
 			LastSuccess: domain.LastSuccess,
+			Timestamp:   time.Now(),
 		}
 	} else {
 		result = domain.PingResult{
 			IP:          ip,
 			LastSuccess: domain.LastSuccess,
+			Timestamp:   time.Now(),
 		}
 	}
 
-	logger.Log.Debug().Msgf("Pinged %s - Last_Success: %v", ip, result.LastSuccess)
+	logger.Log.Debug().Msgf("Пинг %s - Успешная попытка: %v", ip, result.LastSuccess)
 
 	return result
 }

@@ -26,7 +26,7 @@ func (r *MonitoringPostgres) CreateData(data domain.PingResult) (int, error) {
 	}
 	var id int
 	createListQuery := fmt.Sprintf("INSERT INTO %s (ip, timestamp, last_success) VALUES ($1,$2,$3) RETURNING id", pingTable)
-	logger.Log.Debug().Str("query", createListQuery).Msg("Executing createdata query / Выполнение запроса createdata")
+	logger.Log.Debug().Str("query", createListQuery).Msg("Выполнение запроса createdata")
 	row := tr.QueryRow(context.Background(), createListQuery, data.IP, data.Timestamp, data.LastSuccess)
 	if err := row.Scan(&id); err != nil {
 		tr.Rollback(context.Background())
@@ -36,7 +36,7 @@ func (r *MonitoringPostgres) CreateData(data domain.PingResult) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	logger.Log.Debug().Int("ping_id", id).Msg("Successfully saved data / Успешно сохранены данные")
+	logger.Log.Debug().Int("ping_id", id).Msg("Успешно сохранены данные")
 	return id, nil
 }
 func (r *MonitoringPostgres) GetData(name string) ([]domain.PingResult, error) {
@@ -60,6 +60,6 @@ func (r *MonitoringPostgres) GetData(name string) ([]domain.PingResult, error) {
 	if err = row.Err(); err != nil {
 		return nil, err
 	}
-	logger.Log.Debug().Int("data_count", len(data)).Msg("Successfully fetched pings / Успешно получены данные о пингах")
+	logger.Log.Debug().Int("data_count", len(data)).Msg("Успешно получены данные о пингах")
 	return data, nil
 }

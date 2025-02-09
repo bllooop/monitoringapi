@@ -11,10 +11,12 @@ services:
       - ./backend/.env
     depends_on:
       - db
+      - message-broker
     environment:
       - DB_PASSWORD=54321
     networks:
       - monitoring_network
+    restart: always
   pinger:
     build: 
       context: .
@@ -27,6 +29,7 @@ services:
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
     restart: always
+    command: ["sh", "-c", "sleep 10 && /go/bin/pinger"]
   frontend:
     build:
       context: ./frontend
@@ -36,6 +39,7 @@ services:
       - "3000:80"
     depends_on:
       - backend
+      - message-broker
     networks:
       - monitoring_network
     restart: unless-stopped
@@ -51,6 +55,30 @@ services:
       - monitoring_network
     ports:
       - 5436:5432
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+      start_period: 10s
+    
+  message-broker:
+    image: rabbitmq:3-management-alpine
+    container_name: message-broker
+    ports:
+      - 5672:5672   
+      - 15672:15672 
+    volumes:
+      - ${HOME}/dev-rabbitmq/data/:/var/lib/rabbitmq
+      - ${HOME}/dev-rabbitmq/log/:/var/log/rabbitmq
+    restart: always
+    networks:
+      - monitoring_network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:

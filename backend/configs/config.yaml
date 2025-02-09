@@ -6,3 +6,4 @@ db:
     dbname: "postgres"
     sslmode: "disable"
     password: "54321"
+amqpurl: "amqp://guest:guest@message-broker:5672/"

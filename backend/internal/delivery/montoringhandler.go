@@ -19,13 +19,13 @@ func JSONStruct(data interface{}) (string, error) {
 
 func (h *Handler) createData(c *gin.Context) {
 	if c.Request.Method != http.MethodPost {
-		newErrorResponse(c, http.StatusBadRequest, "only post method allowed")
+		newErrorResponse(c, http.StatusBadRequest, "Разрешен только метод POST")
 		return
 	}
 	var input domain.PingResult
 	err := c.BindJSON(&input)
 	if err != nil || input.IP == "" {
-		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
+		newErrorResponse(c, http.StatusBadRequest, "Некорретный ввод данных")
 		return
 	}
 	input.Timestamp = time.Now()

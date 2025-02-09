@@ -52,42 +52,44 @@ func Run() {
 		SSLMode:  viper.GetString("db.sslmode"),
 	}, migratePath); err != nil {
 		logger.Log.Error().Err(err).Msg("")
-		logger.Log.Fatal().Msg("There was an error when migrating / Возникла ошибка при переносе")
+		logger.Log.Fatal().Msg("Возникла ошибка при переносе")
 	}
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("")
-		logger.Log.Fatal().Msg("There was an error with database / Произошла ошибка с базой данных")
+		logger.Log.Fatal().Msg("Произошла ошибка с базой данных")
 	}
-	logger.Log.Debug().Msg("Initializing repository layer / Инициализация слоя репозитория")
+	logger.Log.Debug().Msg("Инициализация слоя репозитория")
 	repos := repository.NewRepository(dbpool)
-	logger.Log.Debug().Msg("Initializing usecase layer / Инициализация usecase слоя")
+	logger.Log.Debug().Msg("Инициализация usecase слоя")
 	usecases := usecase.NewUsecase(repos)
-	logger.Log.Debug().Msg("Initializing API handlers / Инициализация обработчиков API")
+	logger.Log.Debug().Msg("Инициализация обработчиков API")
 	handler := handlers.NewHandler(usecases)
+
+	go usecases.PingConsumer(viper.GetString("amqpurl"))
 	srv := new(Server)
 
 	go func() {
-		logger.Log.Info().Msg("Starting server... / Запуск сервера...")
+		logger.Log.Info().Msg("Запуск сервера...")
 		if err := srv.RunServer(viper.GetString("port"), handler.InitRoutes()); err != nil && err == http.ErrServerClosed {
-			logger.Log.Info().Msg("Server was shut down gracefully / Сервер был закрыт аккуратно")
+			logger.Log.Info().Msg("Сервер был закрыт аккуратно")
 		} else {
 			logger.Log.Error().Err(err).Msg("")
-			logger.Log.Fatal().Msg("There was an error when starting the server / При запуске сервера произошла ошибка")
+			logger.Log.Fatal().Msg("При запуске сервера произошла ошибка")
 		}
 	}()
-	logger.Log.Info().Msg("Server is running / Сервер работает")
+	logger.Log.Info().Msg("Сервер работает")
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
-	logger.Log.Debug().Msg("Listening for OS termination signals / Прослушивание сигналов завершения работы ОС")
+	logger.Log.Debug().Msg("Прослушивание сигналов завершения работы ОС")
 	<-quit
-	logger.Log.Info().Msg("Server is shutting down / Сервер отключается")
+	logger.Log.Info().Msg("Сервер отключается")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	defer dbpool.Close()
-	logger.Log.Debug().Msg("Closing database connection / Закрытие соединения с базой данных ")
+	logger.Log.Debug().Msg("Закрытие соединения с базой данных ")
 	if err := srv.Shutdown(ctx); err != nil {
 		logger.Log.Error().Err(err).Msg("")
-		logger.Log.Fatal().Msg("There was an error while shutting down the server / При выключении сервера произошла ошибка")
+		logger.Log.Fatal().Msg("При выключении сервера произошла ошибка")
 	}
 }
 

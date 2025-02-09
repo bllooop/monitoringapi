@@ -12,6 +12,7 @@ type Usecase struct {
 type MonitoringService interface {
 	GetData(name string) ([]domain.PingResult, error)
 	CreateData(data domain.PingResult) (int, error)
+	PingConsumer(amqpURL string)
 }
 
 func NewUsecase(repository *repository.Repository) *Usecase {
