@@ -6,7 +6,7 @@
 ### Использование docker-compose.
    Для клонирования репозитория нужно использовать команду
    ```
-   git clone --recursive https://github.com/your-username/monitoring-project.git
+   git clone --recursive https://github.com/bllooop/monitoringapi.git
    ```
    Либо сначала такую команду
    ```
